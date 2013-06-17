@@ -110,19 +110,13 @@ echo 0 > /proc/sys/net/ipv4/conf/all/accept_source_route
 ##########################
 
 fw_stop () {
-	echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
-	echo
-	echo "Please enter '\033[31;01mstop\033[00m' to confirm : "
-	read 
-	if [[ $REPLY == 'stop' ]]
-	then
-		/sbin/iptables -F
-		/sbin/iptables -t nat -F
-		/sbin/iptables -t mangle -F
-		/sbin/iptables -P INPUT DROP
-		/sbin/iptables -P FORWARD DROP
-		/sbin/iptables -P OUTPUT ACCEPT
-	fi
+	/sbin/iptables -F
+	/sbin/iptables -t nat -F
+	/sbin/iptables -t mangle -F
+	/sbin/iptables -P INPUT DROP
+	/sbin/iptables -P FORWARD DROP
+	/sbin/iptables -P OUTPUT ACCEPT
+	
 }
 
 ##########################
@@ -175,8 +169,15 @@ case "$1" in
 	echo "done."
 	;;
 	stop)
-	echo -n "Stopping firewall..."
-	fw_stop
+	echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
+	echo
+	echo "Please enter '\033[31;01mstop\033[00m' to confirm : "
+	read reply
+	if [[ reply== 'stop' ]]
+	then
+		echo -n "Stopping firewall..."
+		fw_stop
+	fi
 	echo "done."
 	;;
 	clear)
