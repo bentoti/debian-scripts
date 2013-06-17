@@ -164,37 +164,40 @@ fw_test () {
 
 case "$1" in
 	start|restart)
-	echo -n "Starting firewall..."
-	fw_restart
-	echo "done."
-	;;
-	stop)
-	echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
-	echo
-	echo "Please enter '\033[31;01mstop\033[00m' to confirm : "
-	read reply
-	if [[ reply== 'stop' ]]
-	then
-		echo -n "Stopping firewall..."
-		fw_stop
-	fi
-	echo "done."
-	;;
-	clear)
-	echo -n "Clearing firewall rules..."
-	fw_clear
-	echo "done."
-	;;
-	test)
-	echo -n "Test Firewall rules..."
-	echo -n "Previous configuration will be restore in 30 seconds"
-	fw_test
-	echo -n "Configuration as been restored"
-	;;
-	*)
-	echo "Usage: $0 {start|stop|restart|clear|test}"
-	echo "Be aware that stop drop all incoming/outgoing traffic !!!"
-	exit 1
-	;;
-	esac
-	exit 0
+echo -n "Starting firewall..."
+fw_restart
+echo "done."
+;;
+stop)
+echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
+read -r -p "Are you sure? [Y/n]} " response
+case $response in
+	[yY][eE][sS]|[yY]) 
+echo -n "Stopping firewall..."
+fw_stop
+;;
+*)
+echo "canceled"
+;;
+esac
+fi
+echo "done."
+;;
+clear)
+echo -n "Clearing firewall rules..."
+fw_clear
+echo "done."
+;;
+test)
+echo -n "Test Firewall rules..."
+echo -n "Previous configuration will be restore in 30 seconds"
+fw_test
+echo -n "Configuration as been restored"
+;;
+*)
+echo "Usage: $0 {start|stop|restart|clear|test}"
+echo "Be aware that stop drop all incoming/outgoing traffic !!!"
+exit 1
+;;
+esac
+exit 0
