@@ -175,13 +175,12 @@ case $response in
 	[yY][eE][sS]|[yY]) 
 echo -n "Stopping firewall..."
 fw_stop
+echo "done."
 ;;
 *)
 echo "canceled"
 ;;
 esac
-fi
-echo "done."
 ;;
 clear)
 echo -n "Clearing firewall rules..."
