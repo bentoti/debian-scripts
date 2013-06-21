@@ -29,8 +29,10 @@ REMOTE_UDP_SERVICES="53" # DNS
 # (if undefined, no rules will be setup)
 # NETWORK_MGMT=192.168.0.0/24
 # Port used for the SSH service, define this is you have setup a
-# management network but remove it from TCP_SERVICES
+# management network
+#  but remove it from TCP_SERVICES
 SSH_PORT="22"
+FTP_BACKUPS="21"
 
 if ! [ -x /sbin/iptables ]; then
 	exit 0
@@ -61,6 +63,22 @@ if [ -n "$NETWORK_MGMT" ] ; then
 else
 	/sbin/iptables -A INPUT -p tcp --dport ${SSH_PORT}  -j ACCEPT
 fi
+
+# Ftp backups
+
+if [ -n "$FTP_BACKUPS" ] ; then
+	# The following two rules allow the inbound FTP connection
+	iptables -A INPUT -p tcp --sport ${FTP_BACKUPS} -m state --state ESTABLISHED -j ACCEPT
+	iptables -A OUTPUT -p tcp --dport ${FTP_BACKUPS} -m state --state NEW,ESTABLISHED -j ACCEPT
+	# The next 2 lines allow active ftp connections
+	#iptables -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j ACCEPT
+	#iptables -A OUTPUT -p tcp --dport 20 -m state --state ESTABLISHED -j ACCEPT
+	# These last two rules allow for passive transfers
+	iptables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
+	iptables -A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED,RELATED -j ACCEPT
+fi
+
+
 # Remote testing
 /sbin/iptables -A INPUT -p icmp -j ACCEPT
 /sbin/iptables -A INPUT -i lo -j ACCEPT
