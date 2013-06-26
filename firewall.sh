@@ -31,8 +31,10 @@ REMOTE_UDP_SERVICES="53" # DNS
 # Port used for the SSH service, define this is you have setup a
 # management network
 #  but remove it from TCP_SERVICES
-SSH_PORT="22"
-FTP_BACKUPS="21"
+SSH_PORT=""
+# FTP backups 
+# Allow backups to an external FTP
+FTP_BACKUPS=""
 
 if ! [ -x /sbin/iptables ]; then
 	exit 0
@@ -68,14 +70,14 @@ fi
 
 if [ -n "$FTP_BACKUPS" ] ; then
 	# The following two rules allow the inbound FTP connection
-	iptables -A INPUT -p tcp --sport ${FTP_BACKUPS} -m state --state ESTABLISHED -j ACCEPT
-	iptables -A OUTPUT -p tcp --dport ${FTP_BACKUPS} -m state --state NEW,ESTABLISHED -j ACCEPT
+	/sbin/iptables -A INPUT -p tcp --sport ${FTP_BACKUPS} -m state --state ESTABLISHED -j ACCEPT
+	/sbin/iptables -A OUTPUT -p tcp --dport ${FTP_BACKUPS} -m state --state NEW,ESTABLISHED -j ACCEPT
 	# The next 2 lines allow active ftp connections
-	#iptables -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j ACCEPT
-	#iptables -A OUTPUT -p tcp --dport 20 -m state --state ESTABLISHED -j ACCEPT
+	#/sbin/iptables -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j ACCEPT
+	#/sbin/iptables -A OUTPUT -p tcp --dport 20 -m state --state ESTABLISHED -j ACCEPT
 	# These last two rules allow for passive transfers
-	iptables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
-	iptables -A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED,RELATED -j ACCEPT
+	/sbin/iptables -A INPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED -j ACCEPT
+	/sbin/iptables -A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 fi
 
 
@@ -188,7 +190,7 @@ echo "done."
 ;;
 stop)
 echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
-read -r -p "Are you sure? [Y/n]} " response
+read -r -p "Stop all connections ? [Y/n] " response
 case $response in
 	[yY][eE][sS]|[yY]) 
 echo -n "Stopping firewall..."
