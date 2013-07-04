@@ -20,18 +20,11 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
 
 # Services that the system will offer to the network
-TCP_SERVICES="22" # SSH only
+TCP_SERVICES="22" # SSH 
 UDP_SERVICES=""
 # Services the system will use from the network
 REMOTE_TCP_SERVICES="80 443" # web browsing
 REMOTE_UDP_SERVICES="53" # DNS
-# Network that will be used for remote mgmt
-# (if undefined, no rules will be setup)
-# NETWORK_MGMT=192.168.0.0/24
-# Port used for the SSH service, define this is you have setup a
-# management network
-#  but remove it from TCP_SERVICES
-SSH_PORT=""
 # FTP backups 
 # Allow backups to an external FTP
 FTP_BACKUPS=""
@@ -48,6 +41,7 @@ fw_start () {
 
 # Input traffic:
 /sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 # Services
 if [ -n "$TCP_SERVICES" ] ; then
 	for PORT in $TCP_SERVICES; do
@@ -59,15 +53,8 @@ if [ -n "$UDP_SERVICES" ] ; then
 		/sbin/iptables -A INPUT -p udp --dport ${PORT} -j ACCEPT
 	done
 fi
-# Remote management
-if [ -n "$NETWORK_MGMT" ] ; then
-	/sbin/iptables -A INPUT -p tcp --src ${NETWORK_MGMT} --dport ${SSH_PORT} -j ACCEPT
-else
-	/sbin/iptables -A INPUT -p tcp --dport ${SSH_PORT}  -j ACCEPT
-fi
 
 # Ftp backups
-
 if [ -n "$FTP_BACKUPS" ] ; then
 	# The following two rules allow the inbound FTP connection
 	/sbin/iptables -A INPUT -p tcp --sport ${FTP_BACKUPS} -m state --state ESTABLISHED -j ACCEPT
@@ -90,13 +77,16 @@ fi
 # Output:
 /sbin/iptables -A OUTPUT -j ACCEPT -o lo
 /sbin/iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
 # ICMP is permitted:
 /sbin/iptables -A OUTPUT -p icmp -j ACCEPT
+
 # So are security package updates:
 # Note: You can hardcode the IP address here to prevent DNS spoofing
 # and to setup the rules even if DNS does not work but then you
 # will not "see" IP changes for this service:
 /sbin/iptables -A OUTPUT -p tcp -d security.debian.org --dport 80 -j ACCEPT
+
 # As well as the services we have defined:
 if [ -n "$REMOTE_TCP_SERVICES" ] ; then
 	for PORT in $REMOTE_TCP_SERVICES; do
@@ -108,10 +98,12 @@ if [ -n "$REMOTE_UDP_SERVICES" ] ; then
 		/sbin/iptables -A OUTPUT -p udp --dport ${PORT} -j ACCEPT
 	done
 fi
+
 # All other connections are registered in syslog
 /sbin/iptables -A OUTPUT -j LOG
 /sbin/iptables -A OUTPUT -j REJECT
 /sbin/iptables -P OUTPUT DROP
+
 # Other network protections
 # (some will only work with some kernel versions)
 echo 1 > /proc/sys/net/ipv4/tcp_syncookies
