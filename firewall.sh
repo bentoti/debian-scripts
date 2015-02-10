@@ -185,11 +185,6 @@ echo -n "Stopping firewall..."
 fw_stop
 echo "done."
 ;;
-*)
-echo "canceled"
-;;
-esac
-;;
 clear)
 echo -n "Clearing firewall rules..."
 fw_clear
