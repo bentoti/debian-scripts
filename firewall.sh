@@ -181,10 +181,6 @@ fw_restart
 echo "done."
 ;;
 stop)
-echo "\033[31;01mBE VERY CAREFUL !!! The incoming and outgoing connection (including the current one) will be stopped. So avoid using the stop command on a remote connection.\033[00m"
-read -r -p "Stop all connections ? [Y/n] " response
-case $response in
-	[yY][eE][sS]|[yY]) 
 echo -n "Stopping firewall..."
 fw_stop
 echo "done."
